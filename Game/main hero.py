@@ -78,42 +78,78 @@ class MainHero(pygame.sprite.Sprite):
         self.vector = 1
         self.vector_left_right = 4
         self.vector_stand = 1
+        self.stand = True
 
     def update(self, *args):
-        if self.frame_count % 5 == 0:
-            if self.vector_left_right == 1:
-                self.cur_frame = (self.cur_frame + 1) % len(self.frames_right)
-                self.image = self.frames_right[self.cur_frame]
-            if self.vector_left_right == 2:
-                self.cur_frame = (self.cur_frame + 1) % len(self.frames_left)
-                self.image = self.frames_left[self.cur_frame]
-            if self.vector_left_right == 3:
-                self.cur_frame = (self.cur_frame + 1) % len(self.frames_stand_left)
-                self.image = self.frames_stand_left[self.cur_frame]
-            if self.vector_left_right == 4:
-                self.cur_frame = (self.cur_frame + 1) % len(self.frames_stand_right)
-                self.image = self.frames_stand_right[self.cur_frame]
         buttons = pygame.key.get_pressed()
         if buttons[pygame.K_UP]:
             self.rect.y -= 1
             self.vector = 3
+            self.stand = False
         if buttons[pygame.K_DOWN]:
             self.rect.y += 1
             self.vector = 4
+            self.stand = False
         if buttons[pygame.K_RIGHT]:
             self.rect.x += 1
             self.vector = 1
             self.vector_left_right = 1
+            self.stand = False
         if buttons[pygame.K_LEFT]:
             self.rect.x -= 1
             self.vector = 2
             self.vector_left_right = 2
-        if not pygame.key.get_pressed()[pygame.K_DOWN] and not pygame.key.get_pressed()[pygame.K_UP] \
-                and not pygame.key.get_pressed()[pygame.K_LEFT] and not pygame.key.get_pressed()[pygame.K_RIGHT]:
-            if self.vector_left_right == 1:
-                self.vector_left_right = 4
-            if self.vector_left_right == 2:
-                self.vector_left_right = 3
+            self.stand = False
+        if self.frame_count % 5 == 0:
+            if not self.stand:
+                if self.vector_left_right == 1:
+                    self.cur_frame = (self.cur_frame + 1) % len(self.frames_right)
+                    self.image = self.frames_right[self.cur_frame]
+                if self.vector_left_right == 2:
+                    self.cur_frame = (self.cur_frame + 1) % len(self.frames_left)
+                    self.image = self.frames_left[self.cur_frame]
+            else:
+                if self.vector_left_right == 1:
+                    self.cur_frame = (self.cur_frame + 1) % len(self.frames_right)
+                    self.image = self.frames_stand_right[self.cur_frame]
+                if self.vector_left_right == 2:
+                    self.cur_frame = (self.cur_frame + 1) % len(self.frames_left)
+                    self.image = self.frames_stand_left[self.cur_frame]
+
+
+            # if self.vector_left_right == 3:
+            #     self.cur_frame = (self.cur_frame + 1) % len(self.frames_stand_left)
+            #     self.image = self.frames_stand_left[self.cur_frame]
+            # if self.vector_left_right == 4:
+            #     self.cur_frame = (self.cur_frame + 1) % len(self.frames_stand_right)
+            #     self.image = self.frames_stand_right[self.cur_frame]
+        # buttons = pygame.key.get_pressed()
+        # if buttons[pygame.K_UP]:
+        #     self.rect.y -= 1
+        #     self.vector = 3
+        #     self.stand = False
+        # if buttons[pygame.K_DOWN]:
+        #     self.rect.y += 1
+        #     self.vector = 4
+        #     self.stand = False
+        # if buttons[pygame.K_RIGHT]:
+        #     self.rect.x += 1
+        #     self.vector = 1
+        #     self.vector_left_right = 1
+        #     self.stand = False
+        # if buttons[pygame.K_LEFT]:
+        #     self.rect.x -= 1
+        #     self.vector = 2
+        #     self.vector_left_right = 2
+        #     self.stand = False
+        # if not pygame.key.get_pressed()[pygame.K_DOWN] and not pygame.key.get_pressed()[pygame.K_UP] \
+        #         and not pygame.key.get_pressed()[pygame.K_LEFT] and not pygame.key.get_pressed()[pygame.K_RIGHT]:
+        #     if self.vector_left_right == 1:
+        #         self.vector_left_right = 4
+        #     if self.vector_left_right == 2:
+        #         self.vector_left_right = 3
+        if not (buttons[pygame.K_UP] or buttons[pygame.K_DOWN] or buttons[pygame.K_RIGHT] or buttons[pygame.K_LEFT]):
+            self.stand = True
         self.frame_count += 1
 
     def fire(self):
@@ -135,15 +171,15 @@ hero = MainHero([load_image("bomzh_vprapo_okonchat0.png", -1), load_image("bomzh
                 [load_image("stait_vlevo00.png", -1), load_image("stait_vlevo01.png", -1),
                  load_image("stait_vlevo02.png", -1),
                  load_image("stait_vlevo03.png", -1), load_image("stait_vlevo04.png", -1),
-                 load_image("stait_vlevo05.png", -1),
-                 load_image("stait_vlevo06.png", -1), load_image("stait_vlevo07.png", -1),
-                 load_image("stait_vlevo08.png", -1)],
+                 load_image("stait_vlevo14.png", -1),
+                 load_image("stait_vlevo15.png", -1), load_image("stait_vlevo16.png", -1),
+                 load_image("stait_vlevo17.png", -1)],
                 [load_image("stait_vpravo00.png", -1), load_image("stait_vpravo01.png", -1), load_image(
                     "stait_vpravo02.png", -1),
                  load_image("stait_vpravo03.png", -1), load_image("stait_vpravo04.png", -1), load_image(
-                    "stait_vpravo05.png", -1),
-                 load_image("stait_vpravo06.png", -1), load_image("stait_vpravo07.png", -1), load_image(
-                    "stait_vpravo08.png", -1)],
+                    "stait_vpravo14.png", -1),
+                 load_image("stait_vpravo15.png", -1), load_image("stait_vpravo16.png", -1), load_image(
+                    "stait_vpravo17.png", -1)],
                 all_sprites)
 
 clock = pygame.time.Clock()
