@@ -122,7 +122,7 @@ clock = pygame.time.Clock()
 running = True
 fps = 60
 while running:
-    screen.fill(pygame.Color("white"))
+    screen.fill(pygame.Color("black"))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
