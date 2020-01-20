@@ -20,7 +20,7 @@ Frases = ['Никто из нас уже не сможет сказать, ка�
 
 pygame.init()
 SCREENSIZE = WIDTH, HEIGHT = 1000, 600
-screen = pygame.display.set_mode(SCREENSIZE, pygame.FULLSCREEN)  # , pygame.FULLSCREEN
+screen = pygame.display.set_mode(SCREENSIZE)  # , pygame.FULLSCREEN
 clock = pygame.time.Clock()
 pygame.display.set_caption('Super Game')
 
