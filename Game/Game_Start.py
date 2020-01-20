@@ -22,11 +22,11 @@ screen = pygame.display.set_mode((1000, 600))#, pygame.FULLSCREEN
 clock = pygame.time.Clock()
 pygame.display.set_caption('Super Game')
 
-
+#загрузка изображения
 def load_image(name):
     return pygame.image.load('data/' + name)
 
-
+#загрузка музыки: mp3 как фон, остальные аудио грузит как короткие эффекты
 def music(name, volume=1):
     if name[-3:] == 'mp3':
         pygame.mixer.music.load('data/' + name)
@@ -37,7 +37,7 @@ def music(name, volume=1):
     else:
         print('error sound')
 
-
+#лейблы меню
 def static_labels():
     font = pygame.font.Font(None, 25)
     screen.blit(font.render(LABELS[0], 1, (255, 255, 255), (0, 0, 0)), (450, 100))
@@ -57,7 +57,7 @@ def static_labels():
     screen.blit(font.render(LABELS[5], 1, (255, 255, 255), (0, 0, 0)), (100 + xl, 350 + yl))
     pygame.draw.rect(screen, (123, 0, 123), (90 + xl, 340 + yl, 130, 30), 1)
 
-
+#сохранение, загрузка и запись в файл saves.txt
 def Saves(save='r'):
     global K, Flag, dialog, menu
     saves = open("saves.txt", save)
@@ -75,19 +75,19 @@ def Saves(save='r'):
 clock = pygame.time.Clock()
 fps = 60
 K = -1
-xl, yl = 0, 50
-save = False
-Flag = False
-dialog = False
-gamerun = True
-menu = True
-lvl = False
-music('TownTheme.mp3')
+xl, yl = 0, 50#перемещение лейблов меню от начальной позиции
+save = False#save = Saves('r') существует ли последнее сохранение
+Flag = False#пока идёт диалог True
+dialog = False#если True начинается диалог(другие переменные из списка должны быть False: dialog, menu, lvl)
+gamerun = True#игровой цикл False завершение
+menu = True#если True отображается меню(другие переменные из списка должны быть False: dialog, menu, lvl)
+lvl = False#если True появляет уровень и управление персонажем(другие переменные из списка должны быть False: dialog, menu, lvl)
+music('TownTheme.mp3')#фоновая музыка
 x_fon, y_fon = 23, 45
 x_walls, y_walls = 0, 0
 fon = load_image('фон_1.png')
 walls = load_image('стены_1.png')
-future = False
+future = False#диалоговае меню "в будущих версиях"
 while gamerun:
     if dialog:
         font = pygame.font.Font(None, 20)
