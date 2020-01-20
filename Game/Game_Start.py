@@ -31,7 +31,7 @@ def load_image(name):
 def music(name, volume=1):
     if name[-3:] == 'mp3':
         pygame.mixer.music.load('data/' + name)
-        pygame.mixer.music.play()
+        #pygame.mixer.music.play()
         pygame.mixer.music.set_volume(volume)
     elif name[-3:] == 'ogg' or name[-3:] == 'wav':
         return pygame.mixer.Sound('data/' + name)
@@ -214,26 +214,54 @@ class Camera:
 camera = Camera()
 
 all_sprites = pygame.sprite.Group()
-
+gamerun = True#игровой цикл False завершение
 clock = pygame.time.Clock()
 fps = 60
 K = -1
 xl, yl = 0, 50#перемещение лейблов меню от начальной позиции
 save = False#save = Saves('r') существует ли последнее сохранение
 Flag = False#пока идёт диалог True
-dialog = False#если True начинается диалог(другие переменные из списка должны быть False: dialog, menu, lvl, future)
-gamerun = True#игровой цикл False завершение
-menu = True#если True отображается меню(другие переменные из списка должны быть False: dialog, menu, lvl, future)
-lvl = False#если True появляет уровень и управление персонажем(другие переменные из списка должны быть False: dialog, menu, lvl, future)
-music('TownTheme.mp3')#фоновая музыка
+menu = True#если True отображается меню(другие переменные из списка должны быть False: dialog, lvl, future)
+dialog = False#если True начинается диалог
+lvl = False#если True появляет уровень и управление персонажем
+future = False#диалоговае меню "в будущих версиях"
 x_fon, y_fon = 23, 45
 x_walls, y_walls = 0, 0
+music('TownTheme.mp3')#фоновая музыка
 fon = load_image('фон_1.png')
 walls = load_image('стены_1.png')
-future = False#диалоговае меню "в будущих версиях"(другие переменные из списка должны быть False: dialog, menu, lvl, future)
 is_hero = False
 while gamerun:
-    if dialog:
+    if menu:
+        screen.fill((10, 10, 10))
+        static_labels()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                gamerun = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = pygame.mouse.get_pos()
+                if event.button == 1 and (90 < (x - xl) < 220) and (140 < (y - yl) < 170):
+                    dialog = True
+                    menu = False
+                if event.button == 1 and (90 < (x - xl) < 220) and (340 < (y - yl) < 370):
+                    Saves('w')
+                    gamerun = False
+                if event.button == 1 and (90 < (x - xl) < 220) and ((290 < (y - yl) < 320) or (240 < (y - yl) < 270)):
+                    future = True
+                    menu = False
+    elif future:
+        screen.fill((0, 0, 0))
+        font = pygame.font.Font(None, 25)
+        screen.blit(font.render('Эта опция появится в будущих версиях.', 1, (255, 0, 0), (0, 0, 0)), (100, 100))
+        screen.blit(font.render('Вернуться в меню.', 1, (255, 0, 0), (0, 0, 0)), (420, 410))
+        pygame.draw.rect(screen, (123, 0, 123), (400, 400, 200, 30), 1)
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = pygame.mouse.get_pos()
+                if event.button == 1 and (400 < x < 600) and (400 < y < 430):
+                    future = False
+                    menu = True
+    elif dialog:
         font = pygame.font.Font(None, 20)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -258,54 +286,30 @@ while gamerun:
             elif K == 5:
                 pass
         pygame.draw.line(screen, (123, 0, 123), [0, 400], [1000, 400], 1)
-        pygame.display.flip()
-    elif menu:
-        screen.fill((10, 10, 10))
-        static_labels()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                gamerun = False
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                x, y = pygame.mouse.get_pos()
-                if event.button == 1 and (90 < (x - xl) < 220) and (140 < (y - yl) < 170):
-                    # dialog = True
-                    lvl = True
-                    menu = False
-                if event.button == 1 and (90 < (x - xl) < 220) and (340 < (y - yl) < 370):
-                    Saves('w')
-                    gamerun = False
-                if event.button == 1 and (90 < (x - xl) < 220) and ((290 < (y - yl) < 320) or (240 < (y - yl) < 270)):
-                    future = True
-                    menu = False
     elif lvl:
         if not is_hero:
             is_hero = True
             floor = Floor(all_sprites)
             walls = Walls(all_sprites)
-            hero = MainHero([load_image("bomzh_vprapo_okonchat0.png", -1), load_image("bomzh_vprapo_okonchat1.png", -1),
-                             load_image("bomzh_vprapo_okonchat2.png", -1), load_image("bomzh_vprapo_okonchat3.png", -1),
-                             load_image("bomzh_vprapo_okonchat4.png", -1), load_image("bomzh_vprapo_okonchat5.png", -1),
-                             load_image("bomzh_vprapo_okonchat6.png", -1),
-                             load_image("bomzh_vprapo_okonchat7.png", -1)],
-                            [load_image("bomzh_vlevo_okonchat0.png", -1), load_image("bomzh_vlevo_okonchat1.png", -1),
-                             load_image("bomzh_vlevo_okonchat2.png", -1), load_image("bomzh_vlevo_okonchat3.png", -1),
-                             load_image("bomzh_vlevo_okonchat4.png", -1), load_image("bomzh_vlevo_okonchat5.png", -1),
-                             load_image("bomzh_vlevo_okonchat6.png", -1), load_image("bomzh_vlevo_okonchat7.png", -1)],
-                            [load_image("stait_vlevo00.png", -1), load_image("stait_vlevo01.png", -1),
-                             load_image("stait_vlevo02.png", -1),
-                             load_image("stait_vlevo03.png", -1), load_image("stait_vlevo04.png", -1),
-                             load_image("stait_vlevo14.png", -1),
-                             load_image("stait_vlevo15.png", -1), load_image("stait_vlevo16.png", -1),
-                             load_image("stait_vlevo17.png", -1)],
-                            [load_image("stait_vpravo00.png", -1), load_image("stait_vpravo01.png", -1), load_image(
-                                "stait_vpravo02.png", -1),
-                             load_image("stait_vpravo03.png", -1), load_image("stait_vpravo04.png", -1), load_image(
-                                "stait_vpravo14.png", -1),
-                             load_image("stait_vpravo15.png", -1), load_image("stait_vpravo16.png", -1), load_image(
-                                "stait_vpravo17.png", -1)], (800, 300),
-                            all_sprites)
-            # walls = Walls(all_sprites)
-            # floor = Floor(all_sprites)
+            hero = MainHero([load_image("bomzh_vprapo_okonchat0.png"), load_image("bomzh_vprapo_okonchat1.png"),
+                             load_image("bomzh_vprapo_okonchat2.png"), load_image("bomzh_vprapo_okonchat3.png"),
+                             load_image("bomzh_vprapo_okonchat4.png"), load_image("bomzh_vprapo_okonchat5.png"),
+                             load_image("bomzh_vprapo_okonchat6.png"),
+                             load_image("bomzh_vprapo_okonchat7.png")],
+                            [load_image("bomzh_vlevo_okonchat0.png"), load_image("bomzh_vlevo_okonchat1.png"),
+                             load_image("bomzh_vlevo_okonchat2.png"), load_image("bomzh_vlevo_okonchat3.png"),
+                             load_image("bomzh_vlevo_okonchat4.png"), load_image("bomzh_vlevo_okonchat5.png"),
+                             load_image("bomzh_vlevo_okonchat6.png"), load_image("bomzh_vlevo_okonchat7.png")],
+                            [load_image("stait_vlevo00.png"), load_image("stait_vlevo01.png"),
+                             load_image("stait_vlevo02.png"), load_image("stait_vlevo03.png"),
+                             load_image("stait_vlevo04.png"), load_image("stait_vlevo14.png"),
+                             load_image("stait_vlevo15.png"), load_image("stait_vlevo16.png"),
+                             load_image("stait_vlevo17.png")],
+                            [load_image("stait_vpravo00.png"), load_image("stait_vpravo01.png"),
+                             load_image("stait_vpravo02.png"), load_image("stait_vpravo03.png"),
+                             load_image("stait_vpravo04.png"), load_image("stait_vpravo14.png"),
+                             load_image("stait_vpravo15.png"), load_image("stait_vpravo16.png"),
+                             load_image("stait_vpravo17.png")], (800, 300), all_sprites)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 lvl = False
@@ -336,18 +340,6 @@ while gamerun:
         # .blit(walls, (x_walls, y_walls))
         all_sprites.update(event)
         all_sprites.draw(screen)
-    elif future:
-        screen.fill((0, 0, 0))
-        font = pygame.font.Font(None, 25)
-        screen.blit(font.render('Эта опция появится в будущих версиях.', 1, (255, 0, 0), (0, 0, 0)), (100, 100))
-        screen.blit(font.render('Вернуться в меню.', 1, (255, 0, 0), (0, 0, 0)), (420, 410))
-        pygame.draw.rect(screen, (123, 0, 123), (400, 400, 200, 30), 1)
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                x, y = pygame.mouse.get_pos()
-                if event.button == 1 and (400 < x < 600) and (400 < y < 430):
-                    future = False
-                    menu = True
     pygame.display.update()
     pygame.display.flip()
     clock.tick(fps)
