@@ -77,7 +77,7 @@ class MainHero(pygame.sprite.Sprite):
     """Класс главного героя. Что умеет:
     1. бегает
     2. стреляет фаерболлами"""
-    image = load_image("hero.png", -1)
+    image = load_image("hero.png")
 
     def __init__(self, frames_right, frames_left, frames_stand_left, frames_stand_right, start_pos, *groups):
         super().__init__(*groups)
@@ -162,7 +162,7 @@ class MainHero(pygame.sprite.Sprite):
 
 class Walls(pygame.sprite.Sprite):
     """"Тупо стены"""
-    image = load_image('стены_1.png', -1)
+    image = load_image('стены_1.png')
 
     def __init__(self, *groups):
         super().__init__(*groups)
@@ -179,7 +179,7 @@ class Walls(pygame.sprite.Sprite):
 
 class Floor(pygame.sprite.Sprite):
     """"Тупо стены"""
-    image = load_image('фон_1.png', -1)
+    image = load_image('фон_1.png')
 
     def __init__(self, *groups):
         super().__init__(*groups)
@@ -231,21 +231,6 @@ x_walls, y_walls = 0, 0
 fon = load_image('фон_1.png')
 walls = load_image('стены_1.png')
 future = False#диалоговае меню "в будущих версиях"(другие переменные из списка должны быть False: dialog, menu, lvl, future)
-xl, yl = 0, 50
-save = False
-Flag = False
-dialog = False
-gamerun = True
-menu = True
-lvl = False
-music('TownTheme.mp3')
-fon = load_image('фон_1.png', -1)
-walls = load_image('стены_1.png', -1)
-# начальное положение фоновых объектов
-x_fon, y_fon = 23, 45
-x_walls, y_walls = 0, 0
-# создаем маски стен и пола для проверки пересечений
-future = False
 is_hero = False
 while gamerun:
     if dialog:
