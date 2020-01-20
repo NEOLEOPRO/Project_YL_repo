@@ -106,12 +106,13 @@ class Enemy(pygame.sprite.Sprite):
 
     def update(self, *args):
         for elem in fireballs:
-        # проверяем попадает ли герой в область видимости врага
+            # проверяем попадает ли герой в область видимости врага
             if self.rect.colliderect(elem):
                 self.kill()
                 elem.kill()
         # движение врагов
-        if ((self.rect.x - hero.rect.x) ** 2 + (self.rect.y - hero.rect.y) ** 2) < 50000 and not self.rect.colliderect(hero):
+        if ((self.rect.x - hero.rect.x) ** 2 + (self.rect.y - hero.rect.y) ** 2) < 50000 and not self.rect.colliderect(
+                hero):
             self.v = 3
             x1 = (self.rect.x + self.v - hero.rect.x) ** 2 + (self.rect.y - hero.rect.y) ** 2
             x2 = (self.rect.x - self.v - hero.rect.x) ** 2 + (self.rect.y - hero.rect.y) ** 2

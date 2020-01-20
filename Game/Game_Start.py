@@ -1,5 +1,6 @@
 import pygame
 import os
+import random
 
 LABELS = ['Название', 'Новая игра', 'Продолжить', 'Достижения', 'Настройки', 'Выход']
 Frases = ['Никто из нас уже не сможет сказать, как выглядят трава, деревья и реки.',
@@ -40,7 +41,7 @@ def load_image(name, colorkey=None):
 def music(name, volume=1):
     if name[-3:] == 'mp3':
         pygame.mixer.music.load('data/' + name)
-        #pygame.mixer.music.play()
+        # pygame.mixer.music.play()
         pygame.mixer.music.set_volume(volume)
     elif name[-3:] == 'ogg' or name[-3:] == 'wav':
         return pygame.mixer.Sound('data/' + name)
@@ -82,6 +83,77 @@ def Saves(save='r'):
         saves.write(str(K) + ' ' + str(int(Flag)) + ' ' + str(int(dialog)) + ' ' + str(int(menu)))
 
 
+screen_rect = (0, 0, WIDTH, HEIGHT)
+
+
+class FireBall(pygame.sprite.Sprite):
+    """Фаерболлы. Что умеют:
+    при попадании во врага убивают его и исчезают"""
+    image = pygame.transform.scale(load_image("fireball.png", -1), (20, 20))
+
+    def __init__(self, x, y, vector, *groups):
+        super().__init__(*groups)
+        self.image = self.image
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.v = 20
+        self.vector = vector
+
+    def update(self, *args):
+        if pygame.sprite.spritecollideany(self, enemy_group):
+            self.kill()
+        if not self.rect.colliderect(screen_rect):
+            self.kill()
+        else:
+            if self.vector == 1:
+                self.rect.x += self.v
+            if self.vector == 2:
+                self.rect.x -= self.v
+            if self.vector == 3:
+                self.rect.y -= self.v
+            if self.vector == 4:
+                self.rect.y += self.v
+
+class Enemy(pygame.sprite.Sprite):
+    """Класс врагов. Что умеют:
+    1.умирать от попадания фаерболла,
+    2.бегать за героем если он находится в радиусе видимости"""
+    image = pygame.transform.scale(load_image("creep.png", -1), (50, 50))
+
+    def __init__(self, *groups):
+        super().__init__(*groups)
+        self.image = Enemy.image
+        self.rect = self.image.get_rect()
+        self.rect.x = random.randint(700, 900)
+        self.rect.y = random.randint(200, 400)
+        # скорость врага
+        self.v = 0
+
+    def update(self, *args):
+        for elem in fireballs:
+            # проверяем попадает ли герой в область видимости врага
+            if self.rect.colliderect(elem):
+                self.kill()
+                elem.kill()
+        # движение врагов
+        if ((self.rect.x - hero.rect.x) ** 2 + (self.rect.y - hero.rect.y) ** 2) < 50000 and not self.rect.colliderect(
+                hero):
+            self.v = 3
+            x1 = (self.rect.x + self.v - hero.rect.x) ** 2 + (self.rect.y - hero.rect.y) ** 2
+            x2 = (self.rect.x - self.v - hero.rect.x) ** 2 + (self.rect.y - hero.rect.y) ** 2
+            y1 = (self.rect.y + self.v - hero.rect.y) ** 2 + (self.rect.x - hero.rect.x) ** 2
+            y2 = (self.rect.y - self.v - hero.rect.y) ** 2 + (self.rect.x - hero.rect.x) ** 2
+            ok = min([x1, x2, y1, y2])
+            if ok == x1:
+                self.rect.x += self.v
+            elif ok == x2:
+                self.rect.x -= self.v
+            elif ok == y1:
+                self.rect.y += self.v
+            elif ok == y2:
+                self.rect.y -= self.v
+
 class MainHero(pygame.sprite.Sprite):
     """Класс главного героя. Что умеет:
     1. бегает
@@ -111,43 +183,43 @@ class MainHero(pygame.sprite.Sprite):
 
     def update(self, *args):
         buttons = pygame.key.get_pressed()
-        if buttons[pygame.K_UP] and not pygame.sprite.collide_mask(self, walls):
+        if buttons[pygame.K_UP]:  # and not pygame.sprite.collide_mask(self, walls):
             self.vector = 3
-            self.rect.y -= 2
-            #if pygame.sprite.collide_mask(self, walls):
-                #self.rect.y += 2
-            #else:
-            self.stand = False
-            #else:
-                #self.in_wall_prison = True
+            self.rect.y -= 3
+            if pygame.sprite.collide_mask(self, walls):
+                self.rect.y += 4
+            else:
+                self.stand = False
+            # else:
+            # self.in_wall_prison = True
 
-        if buttons[pygame.K_DOWN] and not pygame.sprite.collide_mask(self, walls):
+        if buttons[pygame.K_DOWN]:  # and not pygame.sprite.collide_mask(self, walls):
             self.vector = 4
-            self.rect.y += 2
-            #if pygame.sprite.collide_mask(self, walls): #or self.in_wall_prison:
-                #self.rect.y -= 2
-            #else:
-            self.stand = False
-        if buttons[pygame.K_RIGHT] and not pygame.sprite.collide_mask(self, walls):
+            self.rect.y += 3
+            if pygame.sprite.collide_mask(self, walls):  # or self.in_wall_prison:
+                self.rect.y -= 4
+            else:
+                self.stand = False
+        if buttons[pygame.K_RIGHT]:  # and not pygame.sprite.collide_mask(self, walls):
             self.vector = 1
             self.vector_left_right = 1
-            self.rect.x += 2
-            #if pygame.sprite.collide_mask(self, walls): #or self.in_wall_prison:
-                #self.rect.x -= 2
-            #else:
-            self.stand = False
-        if buttons[pygame.K_LEFT] and not pygame.sprite.collide_mask(self, walls):
+            self.rect.x += 3
+            if pygame.sprite.collide_mask(self, walls):  # or self.in_wall_prison:
+                self.rect.x -= 4
+            else:
+                self.stand = False
+        if buttons[pygame.K_LEFT]:  # and not pygame.sprite.collide_mask(self, walls):
             self.vector = 2
             self.vector_left_right = 2
-            self.rect.x -= 2
-            #if pygame.sprite.collide_mask(self, walls): #or self.in_wall_prison:
-                #self.rect.x += 2
-            #else:
-            self.stand = False
+            self.rect.x -= 3
+            if pygame.sprite.collide_mask(self, walls):  # or self.in_wall_prison:
+                self.rect.x += 4
+            else:
+                self.stand = False
 
         # проверка на выход из "стенной тюрьмы"
-        #if not pygame.sprite.collide_mask(self, walls):
-            #self.in_wall_prison = False
+        # if not pygame.sprite.collide_mask(self, walls):
+        # self.in_wall_prison = False
         if self.frame_count % 5 == 0:
             if not self.stand:
                 if self.vector_left_right == 1:
@@ -167,6 +239,9 @@ class MainHero(pygame.sprite.Sprite):
         if not (buttons[pygame.K_UP] or buttons[pygame.K_DOWN] or buttons[pygame.K_RIGHT] or buttons[pygame.K_LEFT]):
             self.stand = True
         self.frame_count += 1
+
+    def fire(self):
+        FireBall(self.rect.x, self.rect.y, self.vector, all_sprites, fireballs)
 
 
 class Walls(pygame.sprite.Sprite):
@@ -223,6 +298,8 @@ class Camera:
 camera = Camera()
 
 all_sprites = pygame.sprite.Group()
+enemy_group = pygame.sprite.Group()
+fireballs = pygame.sprite.Group()
 
 clock = pygame.time.Clock()
 fps = 60
@@ -315,12 +392,17 @@ while gamerun:
                              load_image("stait_vpravo15.png", -1), load_image("stait_vpravo16.png", -1), load_image(
                                 "stait_vpravo17.png", -1)], (800, 300),
                             all_sprites)
+            for i in range(10):
+                Enemy(all_sprites, enemy_group)
             # walls = Walls(all_sprites)
             # floor = Floor(all_sprites)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 lvl = False
                 gamerun = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    hero.fire()
         # buttons = pygame.key.get_pressed()
         # if buttons[pygame.K_RIGHT]:
         #     x_walls -= 5
