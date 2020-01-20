@@ -40,7 +40,7 @@ def load_image(name, colorkey=None):
 def music(name, volume=1):
     if name[-3:] == 'mp3':
         pygame.mixer.music.load('data/' + name)
-        pygame.mixer.music.play()
+        #pygame.mixer.music.play()
         pygame.mixer.music.set_volume(volume)
     elif name[-3:] == 'ogg' or name[-3:] == 'wav':
         return pygame.mixer.Sound('data/' + name)
@@ -100,31 +100,54 @@ class MainHero(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = start_pos[0]
         self.rect.y = start_pos[1]
+        self.mask = pygame.mask.from_surface(self.image)
         self.vector = 1
-        self.vector_left_right = 4
+        self.vector_left_right = 1
         self.vector_stand = 1
+        # проверка на остановку
         self.stand = True
+        # чтобы перс не застрявал в верхних стенах
+        self.in_wall_prison = False
 
     def update(self, *args):
         buttons = pygame.key.get_pressed()
-        if buttons[pygame.K_UP]:
-            self.rect.y -= 1
+        if buttons[pygame.K_UP] and not pygame.sprite.collide_mask(self, walls):
             self.vector = 3
+            self.rect.y -= 2
+            #if pygame.sprite.collide_mask(self, walls):
+                #self.rect.y += 2
+            #else:
             self.stand = False
-        if buttons[pygame.K_DOWN]:
-            self.rect.y += 1
+            #else:
+                #self.in_wall_prison = True
+
+        if buttons[pygame.K_DOWN] and not pygame.sprite.collide_mask(self, walls):
             self.vector = 4
+            self.rect.y += 2
+            #if pygame.sprite.collide_mask(self, walls): #or self.in_wall_prison:
+                #self.rect.y -= 2
+            #else:
             self.stand = False
-        if buttons[pygame.K_RIGHT]:
-            self.rect.x += 1
+        if buttons[pygame.K_RIGHT] and not pygame.sprite.collide_mask(self, walls):
             self.vector = 1
             self.vector_left_right = 1
+            self.rect.x += 2
+            #if pygame.sprite.collide_mask(self, walls): #or self.in_wall_prison:
+                #self.rect.x -= 2
+            #else:
             self.stand = False
-        if buttons[pygame.K_LEFT]:
-            self.rect.x -= 1
+        if buttons[pygame.K_LEFT] and not pygame.sprite.collide_mask(self, walls):
             self.vector = 2
             self.vector_left_right = 2
+            self.rect.x -= 2
+            #if pygame.sprite.collide_mask(self, walls): #or self.in_wall_prison:
+                #self.rect.x += 2
+            #else:
             self.stand = False
+
+        # проверка на выход из "стенной тюрьмы"
+        #if not pygame.sprite.collide_mask(self, walls):
+            #self.in_wall_prison = False
         if self.frame_count % 5 == 0:
             if not self.stand:
                 if self.vector_left_right == 1:
@@ -140,14 +163,44 @@ class MainHero(pygame.sprite.Sprite):
                 if self.vector_left_right == 2:
                     self.cur_frame = (self.cur_frame + 1) % len(self.frames_left)
                     self.image = self.frames_stand_left[self.cur_frame]
+            self.mask = pygame.mask.from_surface(self.image)
         if not (buttons[pygame.K_UP] or buttons[pygame.K_DOWN] or buttons[pygame.K_RIGHT] or buttons[pygame.K_LEFT]):
             self.stand = True
         self.frame_count += 1
 
 
-# начальное положение фоновых объектов
-x_fon, y_fon = 23, 45
-x_walls, y_walls = 0, 0
+class Walls(pygame.sprite.Sprite):
+    """"Тупо стены"""
+    image = load_image('стены_1.png', -1)
+
+    def __init__(self, *groups):
+        super().__init__(*groups)
+        self.image = self.image
+        self.rect = self.image.get_rect()
+        self.rect.x = 0
+        self.rect.y = 0
+        self.mask = pygame.mask.from_surface(self.image)
+
+    def update(self, *args):
+        # камон, это же стены
+        pass
+
+
+class Floor(pygame.sprite.Sprite):
+    """"Тупо стены"""
+    image = load_image('фон_1.png', -1)
+
+    def __init__(self, *groups):
+        super().__init__(*groups)
+        self.image = self.image
+        self.rect = self.image.get_rect()
+        self.rect.x = 23
+        self.rect.y = 45
+        self.mask = pygame.mask.from_surface(self.image)
+
+    def update(self, *args):
+        # камон, это же пол
+        pass
 
 
 class Camera:
@@ -162,9 +215,9 @@ class Camera:
         obj.rect.y += self.dy
 
     # позиционировать камеру на объекте target
-    def update(self, target):
-        self.dx = -(target.rect.x + target.rect.w // 2 - WIDTH // 2)
-        self.dy = -(target.rect.y + target.rect.h // 2 - HEIGHT // 2)
+    def update(self, *args):
+        self.dx = -(args[0].rect.x + args[0].rect.w // 2 - WIDTH // 2)
+        self.dy = -(args[0].rect.y + args[0].rect.h // 2 - HEIGHT // 2)
 
 
 camera = Camera()
@@ -182,8 +235,12 @@ gamerun = True
 menu = True
 lvl = False
 music('TownTheme.mp3')
-fon = load_image('фон_1.png')
-walls = load_image('стены_1.png')
+fon = load_image('фон_1.png', -1)
+walls = load_image('стены_1.png', -1)
+# начальное положение фоновых объектов
+x_fon, y_fon = 23, 45
+x_walls, y_walls = 0, 0
+# создаем маски стен и пола для проверки пересечений
 future = False
 is_hero = False
 while gamerun:
@@ -234,6 +291,8 @@ while gamerun:
     elif lvl:
         if not is_hero:
             is_hero = True
+            floor = Floor(all_sprites)
+            walls = Walls(all_sprites)
             hero = MainHero([load_image("bomzh_vprapo_okonchat0.png", -1), load_image("bomzh_vprapo_okonchat1.png", -1),
                              load_image("bomzh_vprapo_okonchat2.png", -1), load_image("bomzh_vprapo_okonchat3.png", -1),
                              load_image("bomzh_vprapo_okonchat4.png", -1), load_image("bomzh_vprapo_okonchat5.png", -1),
@@ -254,8 +313,10 @@ while gamerun:
                              load_image("stait_vpravo03.png", -1), load_image("stait_vpravo04.png", -1), load_image(
                                 "stait_vpravo14.png", -1),
                              load_image("stait_vpravo15.png", -1), load_image("stait_vpravo16.png", -1), load_image(
-                                "stait_vpravo17.png", -1)], (500, 300),
+                                "stait_vpravo17.png", -1)], (800, 300),
                             all_sprites)
+            # walls = Walls(all_sprites)
+            # floor = Floor(all_sprites)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 lvl = False
@@ -277,13 +338,13 @@ while gamerun:
         camera.update(hero)
         for sprite in all_sprites:
             camera.apply(sprite)
-        x_fon += camera.dx
-        y_fon += camera.dy
-        x_walls += camera.dx
-        y_walls += camera.dy
+        # x_fon += camera.dx
+        # y_fon += camera.dy
+        # x_walls += camera.dx
+        # y_walls += camera.dy
 
-        screen.blit(fon, (x_fon, y_fon))
-        screen.blit(walls, (x_walls, y_walls))
+        # screen.blit(fon, (x_fon, y_fon))
+        # .blit(walls, (x_walls, y_walls))
         all_sprites.update(event)
         all_sprites.draw(screen)
     elif future:
