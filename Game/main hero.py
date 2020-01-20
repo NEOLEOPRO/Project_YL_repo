@@ -115,39 +115,6 @@ class MainHero(pygame.sprite.Sprite):
                 if self.vector_left_right == 2:
                     self.cur_frame = (self.cur_frame + 1) % len(self.frames_left)
                     self.image = self.frames_stand_left[self.cur_frame]
-
-
-            # if self.vector_left_right == 3:
-            #     self.cur_frame = (self.cur_frame + 1) % len(self.frames_stand_left)
-            #     self.image = self.frames_stand_left[self.cur_frame]
-            # if self.vector_left_right == 4:
-            #     self.cur_frame = (self.cur_frame + 1) % len(self.frames_stand_right)
-            #     self.image = self.frames_stand_right[self.cur_frame]
-        # buttons = pygame.key.get_pressed()
-        # if buttons[pygame.K_UP]:
-        #     self.rect.y -= 1
-        #     self.vector = 3
-        #     self.stand = False
-        # if buttons[pygame.K_DOWN]:
-        #     self.rect.y += 1
-        #     self.vector = 4
-        #     self.stand = False
-        # if buttons[pygame.K_RIGHT]:
-        #     self.rect.x += 1
-        #     self.vector = 1
-        #     self.vector_left_right = 1
-        #     self.stand = False
-        # if buttons[pygame.K_LEFT]:
-        #     self.rect.x -= 1
-        #     self.vector = 2
-        #     self.vector_left_right = 2
-        #     self.stand = False
-        # if not pygame.key.get_pressed()[pygame.K_DOWN] and not pygame.key.get_pressed()[pygame.K_UP] \
-        #         and not pygame.key.get_pressed()[pygame.K_LEFT] and not pygame.key.get_pressed()[pygame.K_RIGHT]:
-        #     if self.vector_left_right == 1:
-        #         self.vector_left_right = 4
-        #     if self.vector_left_right == 2:
-        #         self.vector_left_right = 3
         if not (buttons[pygame.K_UP] or buttons[pygame.K_DOWN] or buttons[pygame.K_RIGHT] or buttons[pygame.K_LEFT]):
             self.stand = True
         self.frame_count += 1

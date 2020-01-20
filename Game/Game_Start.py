@@ -58,7 +58,7 @@ def static_labels():
     pygame.draw.rect(screen, (123, 0, 123), (90 + xl, 340 + yl, 130, 30), 1)
 
 #сохранение, загрузка и запись в файл saves.txt
-def Saves(save='r', rof=0):
+def Saves(save='r'):
     global K, Flag, dialog, menu
     saves = open("saves.txt", save)
     if save == 'r':
@@ -76,7 +76,7 @@ clock = pygame.time.Clock()
 fps = 60
 K = -1
 xl, yl = 0, 50#перемещение лейблов меню от начальной позиции
-save = Saves('r')#существует ли последнее сохранение
+save = False#save = Saves('r') существует ли последнее сохранение
 Flag = False#пока идёт диалог True
 dialog = False#если True начинается диалог(другие переменные из списка должны быть False: dialog, menu, lvl, future)
 gamerun = True#игровой цикл False завершение
@@ -132,9 +132,6 @@ while gamerun:
                 if event.button == 1 and (90 < (x - xl) < 220) and ((290 < (y - yl) < 320) or (240 < (y - yl) < 270)):
                     future = True
                     menu = False
-                if event.button == 1 and (90 < (x - xl) < 220) and (340 < (y - yl) < 370):
-                    if save == 0:
-                        pass
     elif lvl:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
