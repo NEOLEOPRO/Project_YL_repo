@@ -1,4 +1,5 @@
 import pygame
+import os
 
 LABELS = ['Название', 'Новая игра', 'Продолжить', 'Достижения', 'Настройки', 'Выход']
 Frases = ['Никто из нас уже не сможет сказать, как выглядят трава, деревья и реки.',
@@ -18,15 +19,24 @@ Frases = ['Никто из нас уже не сможет сказать, ка�
           '*Показываем вход в ту тюрьму, перс заходит в неё*']
 
 pygame.init()
-screen = pygame.display.set_mode((1000, 600))#, pygame.FULLSCREEN
+SCREENSIZE = WIDTH, HEIGHT = 1000, 600
+screen = pygame.display.set_mode(SCREENSIZE)  # , pygame.FULLSCREEN
 clock = pygame.time.Clock()
 pygame.display.set_caption('Super Game')
 
-#загрузка изображения
-def load_image(name):
-    return pygame.image.load('data/' + name)
 
-#загрузка музыки: mp3 как фон, остальные аудио грузит как короткие эффекты
+def load_image(name, colorkey=None):
+    fullname = os.path.join('data', name)
+    image = pygame.image.load(fullname).convert()
+    if colorkey is not None:
+        if colorkey == -1:
+            colorkey = image.get_at((0, 0))
+        image.set_colorkey(colorkey)
+    else:
+        image = image.convert_alpha()
+    return image
+
+
 def music(name, volume=1):
     if name[-3:] == 'mp3':
         pygame.mixer.music.load('data/' + name)
@@ -37,7 +47,7 @@ def music(name, volume=1):
     else:
         print('error sound')
 
-#лейблы меню
+
 def static_labels():
     font = pygame.font.Font(None, 25)
     screen.blit(font.render(LABELS[0], 1, (255, 255, 255), (0, 0, 0)), (450, 100))
@@ -57,8 +67,8 @@ def static_labels():
     screen.blit(font.render(LABELS[5], 1, (255, 255, 255), (0, 0, 0)), (100 + xl, 350 + yl))
     pygame.draw.rect(screen, (123, 0, 123), (90 + xl, 340 + yl, 130, 30), 1)
 
-#сохранение, загрузка и запись в файл saves.txt
-def Saves(save='r', rof=0):
+
+def Saves(save='r'):
     global K, Flag, dialog, menu
     saves = open("saves.txt", save)
     if save == 'r':
@@ -72,22 +82,110 @@ def Saves(save='r', rof=0):
         saves.write(str(K) + ' ' + str(int(Flag)) + ' ' + str(int(dialog)) + ' ' + str(int(menu)))
 
 
+class MainHero(pygame.sprite.Sprite):
+    """Класс главного героя. Что умеет:
+    1. бегает
+    2. стреляет фаерболлами"""
+    image = load_image("hero.png", -1)
+
+    def __init__(self, frames_right, frames_left, frames_stand_left, frames_stand_right, start_pos, *groups):
+        super().__init__(*groups)
+        self.frames_right = frames_right
+        self.frames_left = frames_left
+        self.frames_stand_left = frames_stand_left
+        self.frames_stand_right = frames_stand_right
+        self.cur_frame = 0
+        self.frame_count = 0
+        self.image = self.frames_right[self.cur_frame]
+        self.rect = self.image.get_rect()
+        self.rect.x = start_pos[0]
+        self.rect.y = start_pos[1]
+        self.vector = 1
+        self.vector_left_right = 4
+        self.vector_stand = 1
+        self.stand = True
+
+    def update(self, *args):
+        buttons = pygame.key.get_pressed()
+        if buttons[pygame.K_UP]:
+            self.rect.y -= 1
+            self.vector = 3
+            self.stand = False
+        if buttons[pygame.K_DOWN]:
+            self.rect.y += 1
+            self.vector = 4
+            self.stand = False
+        if buttons[pygame.K_RIGHT]:
+            self.rect.x += 1
+            self.vector = 1
+            self.vector_left_right = 1
+            self.stand = False
+        if buttons[pygame.K_LEFT]:
+            self.rect.x -= 1
+            self.vector = 2
+            self.vector_left_right = 2
+            self.stand = False
+        if self.frame_count % 5 == 0:
+            if not self.stand:
+                if self.vector_left_right == 1:
+                    self.cur_frame = (self.cur_frame + 1) % len(self.frames_right)
+                    self.image = self.frames_right[self.cur_frame]
+                if self.vector_left_right == 2:
+                    self.cur_frame = (self.cur_frame + 1) % len(self.frames_left)
+                    self.image = self.frames_left[self.cur_frame]
+            else:
+                if self.vector_left_right == 1:
+                    self.cur_frame = (self.cur_frame + 1) % len(self.frames_right)
+                    self.image = self.frames_stand_right[self.cur_frame]
+                if self.vector_left_right == 2:
+                    self.cur_frame = (self.cur_frame + 1) % len(self.frames_left)
+                    self.image = self.frames_stand_left[self.cur_frame]
+        if not (buttons[pygame.K_UP] or buttons[pygame.K_DOWN] or buttons[pygame.K_RIGHT] or buttons[pygame.K_LEFT]):
+            self.stand = True
+        self.frame_count += 1
+
+
+# начальное положение фоновых объектов
+x_fon, y_fon = 23, 45
+x_walls, y_walls = 0, 0
+
+
+class Camera:
+    # зададим начальный сдвиг камеры
+    def __init__(self):
+        self.dx = 0
+        self.dy = 0
+
+    # сдвинуть объект obj на смещение камеры
+    def apply(self, obj):
+        obj.rect.x += self.dx
+        obj.rect.y += self.dy
+
+    # позиционировать камеру на объекте target
+    def update(self, target):
+        self.dx = -(target.rect.x + target.rect.w // 2 - WIDTH // 2)
+        self.dy = -(target.rect.y + target.rect.h // 2 - HEIGHT // 2)
+
+
+camera = Camera()
+
+all_sprites = pygame.sprite.Group()
+
 clock = pygame.time.Clock()
 fps = 60
 K = -1
-xl, yl = 0, 50#перемещение лейблов меню от начальной позиции
-save = Saves('r')#существует ли последнее сохранение
-Flag = False#пока идёт диалог True
-dialog = False#если True начинается диалог(другие переменные из списка должны быть False: dialog, menu, lvl, future)
-gamerun = True#игровой цикл False завершение
-menu = True#если True отображается меню(другие переменные из списка должны быть False: dialog, menu, lvl, future)
-lvl = False#если True появляет уровень и управление персонажем(другие переменные из списка должны быть False: dialog, menu, lvl, future)
-music('TownTheme.mp3')#фоновая музыка
-x_fon, y_fon = 23, 45
-x_walls, y_walls = 0, 0
+xl, yl = 0, 50
+save = False
+Flag = False
+dialog = False
+gamerun = True
+menu = True
+lvl = False
+music('TownTheme.mp3')
 fon = load_image('фон_1.png')
 walls = load_image('стены_1.png')
-future = False#диалоговае меню "в будущих версиях"(другие переменные из списка должны быть False: dialog, menu, lvl, future)
+future = False
+is_hero = False
 while gamerun:
     if dialog:
         font = pygame.font.Font(None, 20)
@@ -124,7 +222,8 @@ while gamerun:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
                 if event.button == 1 and (90 < (x - xl) < 220) and (140 < (y - yl) < 170):
-                    dialog = True
+                    # dialog = True
+                    lvl = True
                     menu = False
                 if event.button == 1 and (90 < (x - xl) < 220) and (340 < (y - yl) < 370):
                     Saves('w')
@@ -132,31 +231,61 @@ while gamerun:
                 if event.button == 1 and (90 < (x - xl) < 220) and ((290 < (y - yl) < 320) or (240 < (y - yl) < 270)):
                     future = True
                     menu = False
-                if event.button == 1 and (90 < (x - xl) < 220) and (340 < (y - yl) < 370):
-                    if save == 0:
-                        pass
     elif lvl:
+        if not is_hero:
+            is_hero = True
+            hero = MainHero([load_image("bomzh_vprapo_okonchat0.png", -1), load_image("bomzh_vprapo_okonchat1.png", -1),
+                             load_image("bomzh_vprapo_okonchat2.png", -1), load_image("bomzh_vprapo_okonchat3.png", -1),
+                             load_image("bomzh_vprapo_okonchat4.png", -1), load_image("bomzh_vprapo_okonchat5.png", -1),
+                             load_image("bomzh_vprapo_okonchat6.png", -1),
+                             load_image("bomzh_vprapo_okonchat7.png", -1)],
+                            [load_image("bomzh_vlevo_okonchat0.png", -1), load_image("bomzh_vlevo_okonchat1.png", -1),
+                             load_image("bomzh_vlevo_okonchat2.png", -1), load_image("bomzh_vlevo_okonchat3.png", -1),
+                             load_image("bomzh_vlevo_okonchat4.png", -1), load_image("bomzh_vlevo_okonchat5.png", -1),
+                             load_image("bomzh_vlevo_okonchat6.png", -1), load_image("bomzh_vlevo_okonchat7.png", -1)],
+                            [load_image("stait_vlevo00.png", -1), load_image("stait_vlevo01.png", -1),
+                             load_image("stait_vlevo02.png", -1),
+                             load_image("stait_vlevo03.png", -1), load_image("stait_vlevo04.png", -1),
+                             load_image("stait_vlevo14.png", -1),
+                             load_image("stait_vlevo15.png", -1), load_image("stait_vlevo16.png", -1),
+                             load_image("stait_vlevo17.png", -1)],
+                            [load_image("stait_vpravo00.png", -1), load_image("stait_vpravo01.png", -1), load_image(
+                                "stait_vpravo02.png", -1),
+                             load_image("stait_vpravo03.png", -1), load_image("stait_vpravo04.png", -1), load_image(
+                                "stait_vpravo14.png", -1),
+                             load_image("stait_vpravo15.png", -1), load_image("stait_vpravo16.png", -1), load_image(
+                                "stait_vpravo17.png", -1)], (500, 300),
+                            all_sprites)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 lvl = False
                 gamerun = False
-        buttons = pygame.key.get_pressed()
-        if buttons[pygame.K_RIGHT]:
-            x_walls -= 5
-            x_fon -= 5
-        if buttons[pygame.K_LEFT]:
-            x_walls += 5
-            x_fon += 5
-        if buttons[pygame.K_UP]:
-            y_walls += 5
-            y_fon += 5
-        if buttons[pygame.K_DOWN]:
-            y_fon -= 5
-            y_walls -= 5
+        # buttons = pygame.key.get_pressed()
+        # if buttons[pygame.K_RIGHT]:
+        #     x_walls -= 5
+        #     x_fon -= 5
+        # if buttons[pygame.K_LEFT]:
+        #     x_walls += 5
+        #     x_fon += 5
+        # if buttons[pygame.K_UP]:
+        #     y_walls += 5
+        #     y_fon += 5
+        # if buttons[pygame.K_DOWN]:
+        #     y_fon -= 5
+        #     y_walls -= 5
         screen.fill((0, 0, 0))
+        camera.update(hero)
+        for sprite in all_sprites:
+            camera.apply(sprite)
+        x_fon += camera.dx
+        y_fon += camera.dy
+        x_walls += camera.dx
+        y_walls += camera.dy
+
         screen.blit(fon, (x_fon, y_fon))
         screen.blit(walls, (x_walls, y_walls))
-        pygame.display.flip()
+        all_sprites.update(event)
+        all_sprites.draw(screen)
     elif future:
         screen.fill((0, 0, 0))
         font = pygame.font.Font(None, 25)
@@ -170,5 +299,6 @@ while gamerun:
                     future = False
                     menu = True
     pygame.display.update()
+    pygame.display.flip()
     clock.tick(fps)
 pygame.quit()
