@@ -79,7 +79,7 @@ def Saves(save='r'):
         saves.write(str(K) + ' ' + str(int(Flag)) + ' ' + str(int(dialog)) + ' ' + str(int(menu)))
 
 clock = pygame.time.Clock()
-fps = 60
+fps = 5
 K = -1
 xl, yl = 0, 50
 save = False
@@ -91,8 +91,9 @@ lvl = False
 music('TownTheme.mp3')
 x_fon, y_fon = 23, 45
 x_walls, y_walls = 0, 0
-fon = load_image('фон_1.png')
-walls = load_image('стены_1.png', -1)
+fon = pygame.image.load('data/фон_1.png')
+walls = pygame.image.load('data/стены_1.png')
+future = False
 while gamerun:
     if dialog:
         font = pygame.font.Font(None, 15)
@@ -134,6 +135,9 @@ while gamerun:
                 if event.button == 1 and (90 < (x - xl) < 220) and (340 < (y - yl) < 370):
                     Saves('w')
                     gamerun = False
+                if event.button == 1 and (90 < (x - xl) < 220) and ((290 < (y - yl) < 320) or (240 < (y - yl) < 270)):
+                    future = True
+                    menu = False
     elif lvl:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -156,6 +160,18 @@ while gamerun:
         screen.blit(fon, (x_fon, y_fon))
         screen.blit(walls, (x_walls, y_walls))
         pygame.display.flip()
+    elif future:
+        screen.fill((0, 0, 0))
+        font = pygame.font.Font(None, 25)
+        screen.blit(font.render('Эта опция появится в будущих версиях.', 1, (255, 0, 0), (0, 0, 0)), (100, 100))
+        screen.blit(font.render('Вернуться в меню.', 1, (255, 0, 0), (0, 0, 0)), (420, 410))
+        pygame.draw.rect(screen, (123, 0, 123), (400, 400, 200, 30), 1)
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = pygame.mouse.get_pos()
+                if event.button == 1 and (400 < x < 530) and (400 < y < 430):
+                    future = False
+                    menu = True
     pygame.display.update()
     clock.tick(fps)
 pygame.quit()
