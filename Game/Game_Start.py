@@ -383,22 +383,20 @@ while gamerun:
                              load_image("bomzh_vprapo_okonchat4.png"), load_image("bomzh_vprapo_okonchat5.png"),
                              load_image("bomzh_vprapo_okonchat6.png"),
                              load_image("bomzh_vprapo_okonchat7.png")],
-                            [load_image("bomzh_vlevo_okonchat0.png"), load_image("bomzh_vlevo_okonchat1.png",),
+                            [load_image("bomzh_vlevo_okonchat0.png"), load_image("bomzh_vlevo_okonchat1.png"),
                              load_image("bomzh_vlevo_okonchat2.png"), load_image("bomzh_vlevo_okonchat3.png"),
                              load_image("bomzh_vlevo_okonchat4.png"), load_image("bomzh_vlevo_okonchat5.png"),
                              load_image("bomzh_vlevo_okonchat6.png"), load_image("bomzh_vlevo_okonchat7.png")],
                             [load_image("stait_vlevo00.png"), load_image("stait_vlevo01.png"),
-                             load_image("stait_vlevo02.png"),
-                             load_image("stait_vlevo03.png"), load_image("stait_vlevo04.png"),
-                             load_image("stait_vlevo14.png"),
+                             load_image("stait_vlevo02.png"), load_image("stait_vlevo03.png"),
+                             load_image("stait_vlevo04.png"), load_image("stait_vlevo14.png"),
                              load_image("stait_vlevo15.png"), load_image("stait_vlevo16.png"),
                              load_image("stait_vlevo17.png")],
-                            [load_image("stait_vpravo00.png"), load_image("stait_vpravo01.png"), load_image(
-                                "stait_vpravo02.png"),
-                             load_image("stait_vpravo03.png"), load_image("stait_vpravo04.png"), load_image(
-                                "stait_vpravo14.png"),
-                             load_image("stait_vpravo15.png"), load_image("stait_vpravo16.png"), load_image(
-                                "stait_vpravo17.png")], (800, 300),
+                            [load_image("stait_vpravo00.png"), load_image("stait_vpravo01.png"),
+                             load_image("stait_vpravo02.png"), load_image("stait_vpravo03.png"),
+                             load_image("stait_vpravo04.png"), load_image("stait_vpravo14.png"),
+                             load_image("stait_vpravo15.png"), load_image("stait_vpravo16.png"),
+                             load_image("stait_vpravo17.png")], (800, 300),
                             all_sprites)
             for i in range(10):
                 Enemy(all_sprites, enemy_group)
