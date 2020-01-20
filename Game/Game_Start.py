@@ -1,5 +1,4 @@
 import pygame
-import os
 import random
 
 LABELS = ['Название', 'Новая игра', 'Продолжить', 'Достижения', 'Настройки', 'Выход']
@@ -26,16 +25,8 @@ clock = pygame.time.Clock()
 pygame.display.set_caption('Super Game')
 
 
-def load_image(name, colorkey=None):
-    fullname = os.path.join('data', name)
-    image = pygame.image.load(fullname).convert()
-    if colorkey is not None:
-        if colorkey == -1:
-            colorkey = image.get_at((0, 0))
-        image.set_colorkey(colorkey)
-    else:
-        image = image.convert_alpha()
-    return image
+def load_image(name):
+    return pygame.image.load('data/' + name)
 
 
 def music(name, volume=1):
@@ -89,7 +80,7 @@ screen_rect = (0, 0, WIDTH, HEIGHT)
 class FireBall(pygame.sprite.Sprite):
     """Фаерболлы. Что умеют:
     при попадании во врага убивают его и исчезают"""
-    image = pygame.transform.scale(load_image("fireball.png", -1), (20, 20))
+    image = pygame.transform.scale(load_image("fireball.png"), (20, 20))
 
     def __init__(self, x, y, vector, *groups):
         super().__init__(*groups)
@@ -120,7 +111,7 @@ class Enemy(pygame.sprite.Sprite):
     """Класс врагов. Что умеют:
     1.умирать от попадания фаерболла,
     2.бегать за героем если он находится в радиусе видимости"""
-    image = pygame.transform.scale(load_image("creep.png", -1), (50, 50))
+    image = pygame.transform.scale(load_image("creep.png"), (50, 50))
 
     def __init__(self, sheet, columns, rows, *groups):
         super().__init__(*groups)
@@ -213,7 +204,7 @@ class MainHero(pygame.sprite.Sprite):
     """Класс главного героя. Что умеет:
     1. бегает
     2. стреляет фаерболлами"""
-    image = load_image("hero.png", -1)
+    image = load_image("hero.png")
 
     def __init__(self, frames_right, frames_left, frames_stand_left, frames_stand_right, start_pos, *groups):
         super().__init__(*groups)
@@ -301,7 +292,7 @@ class MainHero(pygame.sprite.Sprite):
 
 class Walls(pygame.sprite.Sprite):
     """"Тупо стены"""
-    image = load_image('стены_1.png', -1)
+    image = load_image('стены_1.png')
 
     def __init__(self, *groups):
         super().__init__(*groups)
@@ -318,7 +309,7 @@ class Walls(pygame.sprite.Sprite):
 
 class Floor(pygame.sprite.Sprite):
     """"Тупо стены"""
-    image = load_image('фон_1.png', -1)
+    image = load_image('фон_1.png')
 
     def __init__(self, *groups):
         super().__init__(*groups)
@@ -350,12 +341,26 @@ class Camera:
         self.dy = -(args[0].rect.y + args[0].rect.h // 2 - HEIGHT // 2)
 
 
+def draw_trap():
+    global k
+    im1 = load_image('trap1.png')
+    im0 = load_image('trap0.png')
+    f = load_image('firetrap.png')
+    if int(str(k)[-2::]) < 50:
+        screen.blit(im0, (100, 100))
+    else:
+        screen.blit(im1, (100, 100))
+        screen.blit(f, (200, 200))
+    k += 1
+
+
 camera = Camera()
 
 all_sprites = pygame.sprite.Group()
 enemy_group = pygame.sprite.Group()
 fireballs = pygame.sprite.Group()
 
+k = 0
 clock = pygame.time.Clock()
 fps = 60
 K = -1
@@ -367,8 +372,8 @@ gamerun = True
 menu = True
 lvl = False
 music('TownTheme.mp3')
-fon = load_image('фон_1.png', -1)
-walls = load_image('стены_1.png', -1)
+fon = load_image('фон_1.png')
+walls = load_image('стены_1.png')
 # начальное положение фоновых объектов
 x_fon, y_fon = 23, 45
 x_walls, y_walls = 0, 0
@@ -404,6 +409,7 @@ while gamerun:
         pygame.display.flip()
     elif menu:
         screen.fill((10, 10, 10))
+        screen.blit(pygame.transform.scale(load_image('worldmap.png'), (WIDTH, HEIGHT)), (0, 0))
         static_labels()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -425,27 +431,25 @@ while gamerun:
             is_hero = True
             floor = Floor(all_sprites)
             walls = Walls(all_sprites)
-            hero = MainHero([load_image("bomzh_vprapo_okonchat0.png", -1), load_image("bomzh_vprapo_okonchat1.png", -1),
-                             load_image("bomzh_vprapo_okonchat2.png", -1), load_image("bomzh_vprapo_okonchat3.png", -1),
-                             load_image("bomzh_vprapo_okonchat4.png", -1), load_image("bomzh_vprapo_okonchat5.png", -1),
-                             load_image("bomzh_vprapo_okonchat6.png", -1),
-                             load_image("bomzh_vprapo_okonchat7.png", -1)],
-                            [load_image("bomzh_vlevo_okonchat0.png", -1), load_image("bomzh_vlevo_okonchat1.png", -1),
-                             load_image("bomzh_vlevo_okonchat2.png", -1), load_image("bomzh_vlevo_okonchat3.png", -1),
-                             load_image("bomzh_vlevo_okonchat4.png", -1), load_image("bomzh_vlevo_okonchat5.png", -1),
-                             load_image("bomzh_vlevo_okonchat6.png", -1), load_image("bomzh_vlevo_okonchat7.png", -1)],
-                            [load_image("stait_vlevo00.png", -1), load_image("stait_vlevo01.png", -1),
-                             load_image("stait_vlevo02.png", -1),
-                             load_image("stait_vlevo03.png", -1), load_image("stait_vlevo04.png", -1),
-                             load_image("stait_vlevo14.png", -1),
-                             load_image("stait_vlevo15.png", -1), load_image("stait_vlevo16.png", -1),
-                             load_image("stait_vlevo17.png", -1)],
-                            [load_image("stait_vpravo00.png", -1), load_image("stait_vpravo01.png", -1), load_image(
-                                "stait_vpravo02.png", -1),
-                             load_image("stait_vpravo03.png", -1), load_image("stait_vpravo04.png", -1), load_image(
-                                "stait_vpravo14.png", -1),
-                             load_image("stait_vpravo15.png", -1), load_image("stait_vpravo16.png", -1), load_image(
-                                "stait_vpravo17.png", -1)], (800, 300),
+            hero = MainHero([load_image("bomzh_vprapo_okonchat0.png"), load_image("bomzh_vprapo_okonchat1.png"),
+                             load_image("bomzh_vprapo_okonchat2.png"), load_image("bomzh_vprapo_okonchat3.png"),
+                             load_image("bomzh_vprapo_okonchat4.png"), load_image("bomzh_vprapo_okonchat5.png"),
+                             load_image("bomzh_vprapo_okonchat6.png"),
+                             load_image("bomzh_vprapo_okonchat7.png")],
+                            [load_image("bomzh_vlevo_okonchat0.png"), load_image("bomzh_vlevo_okonchat1.png"),
+                             load_image("bomzh_vlevo_okonchat2.png"), load_image("bomzh_vlevo_okonchat3.png"),
+                             load_image("bomzh_vlevo_okonchat4.png"), load_image("bomzh_vlevo_okonchat5.png"),
+                             load_image("bomzh_vlevo_okonchat6.png"), load_image("bomzh_vlevo_okonchat7.png")],
+                            [load_image("stait_vlevo00.png"), load_image("stait_vlevo01.png"),
+                             load_image("stait_vlevo02.png"), load_image("stait_vlevo03.png"),
+                             load_image("stait_vlevo04.png"), load_image("stait_vlevo14.png"),
+                             load_image("stait_vlevo15.png"), load_image("stait_vlevo16.png"),
+                             load_image("stait_vlevo17.png")],
+                            [load_image("stait_vpravo00.png"), load_image("stait_vpravo01.png"),
+                             load_image("stait_vpravo02.png"), load_image("stait_vpravo03.png"),
+                             load_image("stait_vpravo04.png"), load_image("stait_vpravo14.png"),
+                             load_image("stait_vpravo15.png"), load_image("stait_vpravo16.png"),
+                             load_image("stait_vpravo17.png")], (800, 300),
                             all_sprites)
             for i in range(5):
                 Enemy(load_image("bloody_zombie-NESW.png"), 3, 4, all_sprites, enemy_group)
@@ -484,6 +488,7 @@ while gamerun:
         # .blit(walls, (x_walls, y_walls))
         all_sprites.update(event)
         all_sprites.draw(screen)
+        draw_trap()
     elif future:
         screen.fill((0, 0, 0))
         font = pygame.font.Font(None, 25)
