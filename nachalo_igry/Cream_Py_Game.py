@@ -1,4 +1,5 @@
 import pygame
+
 LABELS = ['Название', 'Новая игра', 'Продолжить', 'Достижения', 'Настройки', 'Выход']
 
 Frases = ['Никто из нас уже не сможет сказать, как выглядят трава, деревья и реки.',
@@ -24,6 +25,7 @@ clock = pygame.time.Clock()
 pygame.display.set_caption('Super Game')
 font = pygame.font.Font(None, 25)
 
+
 def static_labels():
     screen.blit(font.render(LABELS[0], 1, (255, 0, 0), (0, 0, 0)), (100, 100))
     pygame.draw.rect(screen, (123, 0, 123), (90, 90, 130, 30), 1)
@@ -38,10 +40,12 @@ def static_labels():
     screen.blit(font.render(LABELS[5], 1, (255, 0, 0), (0, 0, 0)), (100, 350))
     pygame.draw.rect(screen, (123, 0, 123), (90, 340, 130, 30), 1)
 
+
 font = pygame.font.Font(None, 15)
 K = -1
 Flag, lvl = False, False
 run = True
+
 
 def lvl_1():
     screen = pygame.display.set_mode((1000, 1000))
@@ -76,6 +80,7 @@ def lvl_1():
 
     pygame.quit()
 
+
 def intro():
     global run, Flag, K, lvl
     while run:
@@ -107,6 +112,7 @@ def intro():
 
     pygame.quit()
 
+
 w = False
 q = True
 
@@ -118,7 +124,7 @@ while q:
             x, y = pygame.mouse.get_pos()
             if event.button == 1 and (90 < x < 220) and (140 < y < 170):
                 w = True
-    screen.fill((0,0,0))
+    screen.fill((0, 0, 0))
     static_labels()
     if w:
         intro()
