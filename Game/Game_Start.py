@@ -122,14 +122,47 @@ class Enemy(pygame.sprite.Sprite):
     2.бегать за героем если он находится в радиусе видимости"""
     image = pygame.transform.scale(load_image("creep.png", -1), (50, 50))
 
-    def __init__(self, *groups):
+    def __init__(self, sheet, columns, rows, *groups):
         super().__init__(*groups)
-        self.image = Enemy.image
+        #self.rect = self.image.get_rect()
+        #self.rect.x = random.randint(700, 900)
+        #self.rect.y = random.randint(200, 400)
+        # скорость врага
+        self.v = 0
+        self.frames_right = []
+        self.frames_left = []
+        self.frames_up = []
+        self.frames_down = []
+        self.cut_sheet(sheet, columns, rows)
+        self.cur_frame = 0
+        self.image = self.frames_right[self.cur_frame]
         self.rect = self.image.get_rect()
         self.rect.x = random.randint(700, 900)
         self.rect.y = random.randint(200, 400)
-        # скорость врага
-        self.v = 0
+        self.vector = 1
+        self.frame_count = 0
+        # проверка на застой
+        self.stand = True
+
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                if j == 0:
+                    self.frames_up.append(sheet.subsurface(pygame.Rect(
+                        frame_location, self.rect.size)))
+                elif j == 1:
+                    self.frames_right.append(sheet.subsurface(pygame.Rect(
+                        frame_location, self.rect.size)))
+                elif j == 2:
+                    self.frames_down.append(sheet.subsurface(pygame.Rect(
+                        frame_location, self.rect.size)))
+                elif j == 3:
+                    self.frames_left.append(sheet.subsurface(pygame.Rect(
+                        frame_location, self.rect.size)))
 
     def update(self, *args):
         for elem in fireballs:
@@ -140,6 +173,7 @@ class Enemy(pygame.sprite.Sprite):
         # движение врагов
         if ((self.rect.x - hero.rect.x) ** 2 + (self.rect.y - hero.rect.y) ** 2) < 50000 and not self.rect.colliderect(
                 hero):
+            self.stand = False
             self.v = 3
             x1 = (self.rect.x + self.v - hero.rect.x) ** 2 + (self.rect.y - hero.rect.y) ** 2
             x2 = (self.rect.x - self.v - hero.rect.x) ** 2 + (self.rect.y - hero.rect.y) ** 2
@@ -148,12 +182,31 @@ class Enemy(pygame.sprite.Sprite):
             ok = min([x1, x2, y1, y2])
             if ok == x1:
                 self.rect.x += self.v
+                self.vector = 1
             elif ok == x2:
                 self.rect.x -= self.v
+                self.vector = 2
             elif ok == y1:
                 self.rect.y += self.v
+                self.vector = 3
             elif ok == y2:
                 self.rect.y -= self.v
+                self.vector = 4
+
+        if self.frame_count % 5 == 0 and not self.stand:
+            self.cur_frame = (self.cur_frame + 1) % len(self.frames_right)
+            print(len(self.frames_right))
+            if self.vector == 1:
+                self.image = self.frames_right[self.cur_frame]
+            elif self.vector == 2:
+                self.image = self.frames_left[self.cur_frame]
+            elif self.vector == 3:
+                self.image = self.frames_down[self.cur_frame]
+            elif self.vector == 4:
+                self.image = self.frames_up[self.cur_frame]
+        self.frame_count += 1
+
+        self.stand = True
 
 
 class MainHero(pygame.sprite.Sprite):
@@ -394,8 +447,8 @@ while gamerun:
                              load_image("stait_vpravo15.png", -1), load_image("stait_vpravo16.png", -1), load_image(
                                 "stait_vpravo17.png", -1)], (800, 300),
                             all_sprites)
-            for i in range(10):
-                Enemy(all_sprites, enemy_group)
+            for i in range(5):
+                Enemy(load_image("bloody_zombie-NESW.png"), 3, 4, all_sprites, enemy_group)
             # walls = Walls(all_sprites)
             # floor = Floor(all_sprites)
         for event in pygame.event.get():
