@@ -53,7 +53,8 @@ def static_labels():
     screen.blit(font.render(LABELS[1], 1, (255, 255, 255), (0, 0, 0)), (100 + xl, 150 + yl))
     pygame.draw.rect(screen, (123, 0, 123), (90 + xl, 140 + yl, 130, 30), 1)
     if save:
-        pass
+        screen.blit(font.render(LABELS[2], 1, (255, 255, 255), (0, 0, 0)), (100 + xl, 200 + yl))
+        pygame.draw.rect(screen, (123, 0, 123), (90 + xl, 190 + yl, 130, 30), 1)
     else:
         screen.blit(font.render(LABELS[2], 1, (100, 100, 100), (0, 0, 0)), (100 + xl, 200 + yl))
         pygame.draw.rect(screen, (123, 0, 123), (90 + xl, 190 + yl, 130, 30), 1)
@@ -64,6 +65,21 @@ def static_labels():
     screen.blit(font.render(LABELS[5], 1, (255, 255, 255), (0, 0, 0)), (100 + xl, 350 + yl))
     pygame.draw.rect(screen, (123, 0, 123), (90 + xl, 340 + yl, 130, 30), 1)
 
+def Saves(save='r'):
+    global K, Flag, dialog, menu
+    saves = open("saves.txt", save)
+    if save == 'r':
+        s = saves.readlines()
+        if s == []:
+            return False
+        else:
+            K, Flag, dialog, menu = int(s[0].split()[0]), *[bool(int(i)) for i in s[0].split()[1:]]
+            return True
+    if save == 'w':
+        saves.write(str(K) + ' ' + str(int(Flag)) + ' ' + str(int(dialog)) + ' ' + str(int(menu)))
+
+clock = pygame.time.Clock()
+fps = 60
 K = -1
 xl, yl = 0, 50
 save = False
@@ -71,10 +87,15 @@ Flag = False
 dialog = False
 gamerun = True
 menu = True
+lvl = False
 music('TownTheme.mp3')
+x_fon, y_fon = 23, 45
+x_walls, y_walls = 0, 0
+fon = load_image('фон_1.png')
+walls = load_image('стены_1.png', -1)
 while gamerun:
     if dialog:
-        menu = False
+        font = pygame.font.Font(None, 15)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 gamerun = False
@@ -87,13 +108,14 @@ while gamerun:
                         K += 1
                     else:
                         Flag = False
-                        K = -1
+                        lvl = True
+                        dialog = False
         screen.fill((10, 10, 10))
         if Flag:
             if K not in [2, 5]:
-                screen.blit(pygame.font.Font(None, 18).render(Frases[K], 1, (255, 0, 0), (0, 0, 0)), (0, 401))
+                screen.blit(font.render(Frases[K], 1, (255, 0, 0), (0, 0, 0)), (0, 401))
             elif K == 2:
-                screen.blit(pygame.font.Font(None, 18).render(Frases[K], 1, (255, 0, 0), (0, 0, 0)), (0, 401))
+                screen.blit(font.render(Frases[K], 1, (255, 0, 0), (0, 0, 0)), (0, 401))
             elif K == 5:
                 pass
         pygame.draw.line(screen, (123, 0, 123), [0, 400], [1000, 400], 1)
@@ -108,7 +130,32 @@ while gamerun:
                 x, y = pygame.mouse.get_pos()
                 if event.button == 1 and (90 < (x - xl) < 220) and (140 < (y - yl) < 170):
                     dialog = True
+                    menu = False
                 if event.button == 1 and (90 < (x - xl) < 220) and (340 < (y - yl) < 370):
+                    Saves('w')
                     gamerun = False
+    elif lvl:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                lvl = False
+                gamerun = False
+        buttons = pygame.key.get_pressed()
+        if buttons[pygame.K_RIGHT]:
+            x_walls -= 5
+            x_fon -= 5
+        if buttons[pygame.K_LEFT]:
+            x_walls += 5
+            x_fon += 5
+        if buttons[pygame.K_UP]:
+            y_walls += 5
+            y_fon += 5
+        if buttons[pygame.K_DOWN]:
+            y_fon -= 5
+            y_walls -= 5
+        screen.fill((0, 0, 0))
+        screen.blit(fon, (x_fon, y_fon))
+        screen.blit(walls, (x_walls, y_walls))
+        pygame.display.flip()
     pygame.display.update()
+    clock.tick(fps)
 pygame.quit()
