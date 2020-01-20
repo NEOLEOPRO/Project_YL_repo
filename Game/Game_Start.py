@@ -78,16 +78,16 @@ K = -1
 xl, yl = 0, 50#перемещение лейблов меню от начальной позиции
 save = False#save = Saves('r') существует ли последнее сохранение
 Flag = False#пока идёт диалог True
-dialog = False#если True начинается диалог(другие переменные из списка должны быть False: dialog, menu, lvl)
+dialog = False#если True начинается диалог(другие переменные из списка должны быть False: dialog, menu, lvl, future)
 gamerun = True#игровой цикл False завершение
-menu = True#если True отображается меню(другие переменные из списка должны быть False: dialog, menu, lvl)
-lvl = False#если True появляет уровень и управление персонажем(другие переменные из списка должны быть False: dialog, menu, lvl)
+menu = True#если True отображается меню(другие переменные из списка должны быть False: dialog, menu, lvl, future)
+lvl = False#если True появляет уровень и управление персонажем(другие переменные из списка должны быть False: dialog, menu, lvl, future)
 music('TownTheme.mp3')#фоновая музыка
 x_fon, y_fon = 23, 45
 x_walls, y_walls = 0, 0
 fon = load_image('фон_1.png')
 walls = load_image('стены_1.png')
-future = False#диалоговае меню "в будущих версиях"
+future = False#диалоговае меню "в будущих версиях"(другие переменные из списка должны быть False: dialog, menu, lvl, future)
 while gamerun:
     if dialog:
         font = pygame.font.Font(None, 20)
