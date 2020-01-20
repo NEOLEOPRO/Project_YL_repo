@@ -21,7 +21,7 @@ Frases = ['Никто из нас уже не сможет сказать, ка�
 
 pygame.init()
 SCREENSIZE = WIDTH, HEIGHT = 1000, 600
-screen = pygame.display.set_mode(SCREENSIZE)  # , pygame.FULLSCREEN
+screen = pygame.display.set_mode(SCREENSIZE, pygame.FULLSCREEN)  # , pygame.FULLSCREEN
 clock = pygame.time.Clock()
 pygame.display.set_caption('Super Game')
 
@@ -297,12 +297,26 @@ class Camera:
         self.dy = -(args[0].rect.y + args[0].rect.h // 2 - HEIGHT // 2)
 
 
+def draw_trap():
+    global k
+    im1 = load_image('trap1.png')
+    im0 = load_image('trap0.png')
+    f = load_image('firetrap.png')
+    if int(str(k)[-2::]) < 50:
+        screen.blit(im0, (100, 100))
+    else:
+        screen.blit(im1, (100, 100))
+        screen.blit(f, (200, 200))
+    k += 1
+
+
 camera = Camera()
 
 all_sprites = pygame.sprite.Group()
 enemy_group = pygame.sprite.Group()
 fireballs = pygame.sprite.Group()
 
+k = 0
 clock = pygame.time.Clock()
 fps = 60
 K = -1
@@ -351,6 +365,7 @@ while gamerun:
         pygame.display.flip()
     elif menu:
         screen.fill((10, 10, 10))
+        screen.blit(pygame.transform.scale(load_image('worldmap.png'), (WIDTH, HEIGHT)), (0, 0))
         static_labels()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -443,6 +458,7 @@ while gamerun:
                 if event.button == 1 and (400 < x < 600) and (400 < y < 430):
                     future = False
                     menu = True
+    draw_trap()
     pygame.display.update()
     pygame.display.flip()
     clock.tick(fps)
