@@ -115,6 +115,7 @@ class FireBall(pygame.sprite.Sprite):
             if self.vector == 4:
                 self.rect.y += self.v
 
+
 class Enemy(pygame.sprite.Sprite):
     """Класс врагов. Что умеют:
     1.умирать от попадания фаерболла,
@@ -153,6 +154,7 @@ class Enemy(pygame.sprite.Sprite):
                 self.rect.y += self.v
             elif ok == y2:
                 self.rect.y -= self.v
+
 
 class MainHero(pygame.sprite.Sprite):
     """Класс главного героя. Что умеет:
