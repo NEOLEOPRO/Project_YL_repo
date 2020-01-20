@@ -18,7 +18,8 @@ Frases = ['Никто из нас уже не сможет сказать, ка�
           '*Показываем вход в ту тюрьму, перс заходит в неё*']
 
 pygame.init()
-screen = pygame.display.set_mode((1000, 600))#, pygame.FULLSCREEN
+SCREENSIZE = WIDTH, HEIGHT = 1000, 600
+screen = pygame.display.set_mode(SCREENSIZE)  # , pygame.FULLSCREEN
 clock = pygame.time.Clock()
 pygame.display.set_caption('Super Game')
 
@@ -72,6 +73,148 @@ def Saves(save='r'):
         saves.write(str(K) + ' ' + str(int(Flag)) + ' ' + str(int(dialog)) + ' ' + str(int(menu)))
 
 
+class MainHero(pygame.sprite.Sprite):
+    """Класс главного героя. Что умеет:
+    1. бегает
+    2. стреляет фаерболлами"""
+    image = load_image("hero.png", -1)
+
+    def __init__(self, frames_right, frames_left, frames_stand_left, frames_stand_right, start_pos, *groups):
+        super().__init__(*groups)
+        self.frames_right = frames_right
+        self.frames_left = frames_left
+        self.frames_stand_left = frames_stand_left
+        self.frames_stand_right = frames_stand_right
+        self.cur_frame = 0
+        self.frame_count = 0
+        self.image = self.frames_right[self.cur_frame]
+        self.rect = self.image.get_rect()
+        self.rect.x = start_pos[0]
+        self.rect.y = start_pos[1]
+        self.mask = pygame.mask.from_surface(self.image)
+        self.vector = 1
+        self.vector_left_right = 1
+        self.vector_stand = 1
+        # проверка на остановку
+        self.stand = True
+        # чтобы перс не застрявал в верхних стенах
+        self.in_wall_prison = False
+
+    def update(self, *args):
+        buttons = pygame.key.get_pressed()
+        if buttons[pygame.K_UP] and not pygame.sprite.collide_mask(self, walls):
+            self.vector = 3
+            self.rect.y -= 2
+            #if pygame.sprite.collide_mask(self, walls):
+                #self.rect.y += 2
+            #else:
+            self.stand = False
+            #else:
+                #self.in_wall_prison = True
+
+        if buttons[pygame.K_DOWN] and not pygame.sprite.collide_mask(self, walls):
+            self.vector = 4
+            self.rect.y += 2
+            #if pygame.sprite.collide_mask(self, walls): #or self.in_wall_prison:
+                #self.rect.y -= 2
+            #else:
+            self.stand = False
+        if buttons[pygame.K_RIGHT] and not pygame.sprite.collide_mask(self, walls):
+            self.vector = 1
+            self.vector_left_right = 1
+            self.rect.x += 2
+            #if pygame.sprite.collide_mask(self, walls): #or self.in_wall_prison:
+                #self.rect.x -= 2
+            #else:
+            self.stand = False
+        if buttons[pygame.K_LEFT] and not pygame.sprite.collide_mask(self, walls):
+            self.vector = 2
+            self.vector_left_right = 2
+            self.rect.x -= 2
+            #if pygame.sprite.collide_mask(self, walls): #or self.in_wall_prison:
+                #self.rect.x += 2
+            #else:
+            self.stand = False
+
+        # проверка на выход из "стенной тюрьмы"
+        #if not pygame.sprite.collide_mask(self, walls):
+            #self.in_wall_prison = False
+        if self.frame_count % 5 == 0:
+            if not self.stand:
+                if self.vector_left_right == 1:
+                    self.cur_frame = (self.cur_frame + 1) % len(self.frames_right)
+                    self.image = self.frames_right[self.cur_frame]
+                if self.vector_left_right == 2:
+                    self.cur_frame = (self.cur_frame + 1) % len(self.frames_left)
+                    self.image = self.frames_left[self.cur_frame]
+            else:
+                if self.vector_left_right == 1:
+                    self.cur_frame = (self.cur_frame + 1) % len(self.frames_right)
+                    self.image = self.frames_stand_right[self.cur_frame]
+                if self.vector_left_right == 2:
+                    self.cur_frame = (self.cur_frame + 1) % len(self.frames_left)
+                    self.image = self.frames_stand_left[self.cur_frame]
+            self.mask = pygame.mask.from_surface(self.image)
+        if not (buttons[pygame.K_UP] or buttons[pygame.K_DOWN] or buttons[pygame.K_RIGHT] or buttons[pygame.K_LEFT]):
+            self.stand = True
+        self.frame_count += 1
+
+
+class Walls(pygame.sprite.Sprite):
+    """"Тупо стены"""
+    image = load_image('стены_1.png', -1)
+
+    def __init__(self, *groups):
+        super().__init__(*groups)
+        self.image = self.image
+        self.rect = self.image.get_rect()
+        self.rect.x = 0
+        self.rect.y = 0
+        self.mask = pygame.mask.from_surface(self.image)
+
+    def update(self, *args):
+        # камон, это же стены
+        pass
+
+
+class Floor(pygame.sprite.Sprite):
+    """"Тупо стены"""
+    image = load_image('фон_1.png', -1)
+
+    def __init__(self, *groups):
+        super().__init__(*groups)
+        self.image = self.image
+        self.rect = self.image.get_rect()
+        self.rect.x = 23
+        self.rect.y = 45
+        self.mask = pygame.mask.from_surface(self.image)
+
+    def update(self, *args):
+        # камон, это же пол
+        pass
+
+
+class Camera:
+    # зададим начальный сдвиг камеры
+    def __init__(self):
+        self.dx = 0
+        self.dy = 0
+
+    # сдвинуть объект obj на смещение камеры
+    def apply(self, obj):
+        obj.rect.x += self.dx
+        obj.rect.y += self.dy
+
+    # позиционировать камеру на объекте target
+    def update(self, *args):
+        self.dx = -(args[0].rect.x + args[0].rect.w // 2 - WIDTH // 2)
+        self.dy = -(args[0].rect.y + args[0].rect.h // 2 - HEIGHT // 2)
+
+
+camera = Camera()
+
+all_sprites = pygame.sprite.Group()
+
 clock = pygame.time.Clock()
 fps = 60
 K = -1
@@ -88,6 +231,22 @@ x_walls, y_walls = 0, 0
 fon = load_image('фон_1.png')
 walls = load_image('стены_1.png')
 future = False#диалоговае меню "в будущих версиях"(другие переменные из списка должны быть False: dialog, menu, lvl, future)
+xl, yl = 0, 50
+save = False
+Flag = False
+dialog = False
+gamerun = True
+menu = True
+lvl = False
+music('TownTheme.mp3')
+fon = load_image('фон_1.png', -1)
+walls = load_image('стены_1.png', -1)
+# начальное положение фоновых объектов
+x_fon, y_fon = 23, 45
+x_walls, y_walls = 0, 0
+# создаем маски стен и пола для проверки пересечений
+future = False
+is_hero = False
 while gamerun:
     if dialog:
         font = pygame.font.Font(None, 20)
@@ -124,7 +283,8 @@ while gamerun:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
                 if event.button == 1 and (90 < (x - xl) < 220) and (140 < (y - yl) < 170):
-                    dialog = True
+                    # dialog = True
+                    lvl = True
                     menu = False
                 if event.button == 1 and (90 < (x - xl) < 220) and (340 < (y - yl) < 370):
                     Saves('w')
@@ -133,27 +293,64 @@ while gamerun:
                     future = True
                     menu = False
     elif lvl:
+        if not is_hero:
+            is_hero = True
+            floor = Floor(all_sprites)
+            walls = Walls(all_sprites)
+            hero = MainHero([load_image("bomzh_vprapo_okonchat0.png", -1), load_image("bomzh_vprapo_okonchat1.png", -1),
+                             load_image("bomzh_vprapo_okonchat2.png", -1), load_image("bomzh_vprapo_okonchat3.png", -1),
+                             load_image("bomzh_vprapo_okonchat4.png", -1), load_image("bomzh_vprapo_okonchat5.png", -1),
+                             load_image("bomzh_vprapo_okonchat6.png", -1),
+                             load_image("bomzh_vprapo_okonchat7.png", -1)],
+                            [load_image("bomzh_vlevo_okonchat0.png", -1), load_image("bomzh_vlevo_okonchat1.png", -1),
+                             load_image("bomzh_vlevo_okonchat2.png", -1), load_image("bomzh_vlevo_okonchat3.png", -1),
+                             load_image("bomzh_vlevo_okonchat4.png", -1), load_image("bomzh_vlevo_okonchat5.png", -1),
+                             load_image("bomzh_vlevo_okonchat6.png", -1), load_image("bomzh_vlevo_okonchat7.png", -1)],
+                            [load_image("stait_vlevo00.png", -1), load_image("stait_vlevo01.png", -1),
+                             load_image("stait_vlevo02.png", -1),
+                             load_image("stait_vlevo03.png", -1), load_image("stait_vlevo04.png", -1),
+                             load_image("stait_vlevo14.png", -1),
+                             load_image("stait_vlevo15.png", -1), load_image("stait_vlevo16.png", -1),
+                             load_image("stait_vlevo17.png", -1)],
+                            [load_image("stait_vpravo00.png", -1), load_image("stait_vpravo01.png", -1), load_image(
+                                "stait_vpravo02.png", -1),
+                             load_image("stait_vpravo03.png", -1), load_image("stait_vpravo04.png", -1), load_image(
+                                "stait_vpravo14.png", -1),
+                             load_image("stait_vpravo15.png", -1), load_image("stait_vpravo16.png", -1), load_image(
+                                "stait_vpravo17.png", -1)], (800, 300),
+                            all_sprites)
+            # walls = Walls(all_sprites)
+            # floor = Floor(all_sprites)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 lvl = False
                 gamerun = False
-        buttons = pygame.key.get_pressed()
-        if buttons[pygame.K_RIGHT]:
-            x_walls -= 5
-            x_fon -= 5
-        if buttons[pygame.K_LEFT]:
-            x_walls += 5
-            x_fon += 5
-        if buttons[pygame.K_UP]:
-            y_walls += 5
-            y_fon += 5
-        if buttons[pygame.K_DOWN]:
-            y_fon -= 5
-            y_walls -= 5
+        # buttons = pygame.key.get_pressed()
+        # if buttons[pygame.K_RIGHT]:
+        #     x_walls -= 5
+        #     x_fon -= 5
+        # if buttons[pygame.K_LEFT]:
+        #     x_walls += 5
+        #     x_fon += 5
+        # if buttons[pygame.K_UP]:
+        #     y_walls += 5
+        #     y_fon += 5
+        # if buttons[pygame.K_DOWN]:
+        #     y_fon -= 5
+        #     y_walls -= 5
         screen.fill((0, 0, 0))
-        screen.blit(fon, (x_fon, y_fon))
-        screen.blit(walls, (x_walls, y_walls))
-        pygame.display.flip()
+        camera.update(hero)
+        for sprite in all_sprites:
+            camera.apply(sprite)
+        # x_fon += camera.dx
+        # y_fon += camera.dy
+        # x_walls += camera.dx
+        # y_walls += camera.dy
+
+        # screen.blit(fon, (x_fon, y_fon))
+        # .blit(walls, (x_walls, y_walls))
+        all_sprites.update(event)
+        all_sprites.draw(screen)
     elif future:
         screen.fill((0, 0, 0))
         font = pygame.font.Font(None, 25)
@@ -167,5 +364,6 @@ while gamerun:
                     future = False
                     menu = True
     pygame.display.update()
+    pygame.display.flip()
     clock.tick(fps)
 pygame.quit()
