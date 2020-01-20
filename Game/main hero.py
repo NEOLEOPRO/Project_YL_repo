@@ -63,10 +63,12 @@ class MainHero(pygame.sprite.Sprite):
     2. стреляет фаерболлами"""
     image = load_image("hero.png", -1)
 
-    def __init__(self, frames_right, frames_left, *groups):
+    def __init__(self, frames_right, frames_left, frames_stand_left, frames_stand_right, *groups):
         super().__init__(*groups)
         self.frames_right = frames_right
         self.frames_left = frames_left
+        self.frames_stand_left = frames_stand_left
+        self.frames_stand_right = frames_stand_right
         self.cur_frame = 0
         self.frame_count = 0
         self.image = self.frames_right[self.cur_frame]
@@ -74,7 +76,8 @@ class MainHero(pygame.sprite.Sprite):
         self.rect.x = 10
         self.rect.y = 10
         self.vector = 1
-        self.vector_left_right = 1
+        self.vector_left_right = 4
+        self.vector_stand = 1
 
     def update(self, *args):
         if self.frame_count % 5 == 0:
@@ -84,21 +87,33 @@ class MainHero(pygame.sprite.Sprite):
             if self.vector_left_right == 2:
                 self.cur_frame = (self.cur_frame + 1) % len(self.frames_left)
                 self.image = self.frames_left[self.cur_frame]
-
-        if pygame.key.get_pressed()[pygame.K_UP]:
-            self.rect.y -= 10
+            if self.vector_left_right == 3:
+                self.cur_frame = (self.cur_frame + 1) % len(self.frames_stand_left)
+                self.image = self.frames_stand_left[self.cur_frame]
+            if self.vector_left_right == 4:
+                self.cur_frame = (self.cur_frame + 1) % len(self.frames_stand_right)
+                self.image = self.frames_stand_right[self.cur_frame]
+        buttons = pygame.key.get_pressed()
+        if buttons[pygame.K_UP]:
+            self.rect.y -= 1
             self.vector = 3
-        if pygame.key.get_pressed()[pygame.K_DOWN]:
-            self.rect.y += 10
+        if buttons[pygame.K_DOWN]:
+            self.rect.y += 1
             self.vector = 4
-        if pygame.key.get_pressed()[pygame.K_RIGHT]:
-            self.rect.x += 10
+        if buttons[pygame.K_RIGHT]:
+            self.rect.x += 1
             self.vector = 1
             self.vector_left_right = 1
-        if pygame.key.get_pressed()[pygame.K_LEFT]:
-            self.rect.x -= 10
+        if buttons[pygame.K_LEFT]:
+            self.rect.x -= 1
             self.vector = 2
             self.vector_left_right = 2
+        if not pygame.key.get_pressed()[pygame.K_DOWN] and not pygame.key.get_pressed()[pygame.K_UP] \
+                and not pygame.key.get_pressed()[pygame.K_LEFT] and not pygame.key.get_pressed()[pygame.K_RIGHT]:
+            if self.vector_left_right == 1:
+                self.vector_left_right = 4
+            if self.vector_left_right == 2:
+                self.vector_left_right = 3
         self.frame_count += 1
 
     def fire(self):
@@ -116,13 +131,26 @@ hero = MainHero([load_image("bomzh_vprapo_okonchat0.png", -1), load_image("bomzh
                 [load_image("bomzh_vlevo_okonchat0.png", -1), load_image("bomzh_vlevo_okonchat1.png", -1),
                  load_image("bomzh_vlevo_okonchat2.png", -1), load_image("bomzh_vlevo_okonchat3.png", -1),
                  load_image("bomzh_vlevo_okonchat4.png", -1), load_image("bomzh_vlevo_okonchat5.png", -1),
-                 load_image("bomzh_vlevo_okonchat6.png", -1), load_image("bomzh_vlevo_okonchat7.png", -1)], all_sprites)
+                 load_image("bomzh_vlevo_okonchat6.png", -1), load_image("bomzh_vlevo_okonchat7.png", -1)],
+                [load_image("stait_vlevo00.png", -1), load_image("stait_vlevo01.png", -1),
+                 load_image("stait_vlevo02.png", -1),
+                 load_image("stait_vlevo03.png", -1), load_image("stait_vlevo04.png", -1),
+                 load_image("stait_vlevo05.png", -1),
+                 load_image("stait_vlevo06.png", -1), load_image("stait_vlevo07.png", -1),
+                 load_image("stait_vlevo08.png", -1)],
+                [load_image("stait_vpravo00.png", -1), load_image("stait_vpravo01.png", -1), load_image(
+                    "stait_vpravo02.png", -1),
+                 load_image("stait_vpravo03.png", -1), load_image("stait_vpravo04.png", -1), load_image(
+                    "stait_vpravo05.png", -1),
+                 load_image("stait_vpravo06.png", -1), load_image("stait_vpravo07.png", -1), load_image(
+                    "stait_vpravo08.png", -1)],
+                all_sprites)
 
 clock = pygame.time.Clock()
 running = True
 fps = 60
 while running:
-    screen.fill(pygame.Color("black"))
+    screen.fill(pygame.Color("white"))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
