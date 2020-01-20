@@ -1,7 +1,6 @@
 import pygame
 import os
 
-
 LABELS = ['Название', 'Новая игра', 'Продолжить', 'Достижения', 'Настройки', 'Выход']
 Frases = ['Никто из нас уже не сможет сказать, как выглядят трава, деревья и реки.',
           'Раньше эти края были прекрасной зелёной долиной, в которой все жили в радости и достатке',
@@ -20,10 +19,10 @@ Frases = ['Никто из нас уже не сможет сказать, ка�
           '*Показываем вход в ту тюрьму, перс заходит в неё*']
 
 pygame.init()
-infoObject = pygame.display.Info()
-screen = pygame.display.set_mode((1000, 600), pygame.FULLSCREEN)
+screen = pygame.display.set_mode((1000, 600))#, pygame.FULLSCREEN
 clock = pygame.time.Clock()
 pygame.display.set_caption('Super Game')
+
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
@@ -36,6 +35,7 @@ def load_image(name, colorkey=None):
         image = image.convert_alpha()
     return image
 
+
 def music(name):
     fullname = os.path.join('data', name)
     if name[-3:] == 'mp3':
@@ -45,6 +45,7 @@ def music(name):
         return pygame.mixer.Sound(fullname)
     else:
         print('error sound')
+
 
 def static_labels():
     font = pygame.font.Font(None, 25)
@@ -65,6 +66,7 @@ def static_labels():
     screen.blit(font.render(LABELS[5], 1, (255, 255, 255), (0, 0, 0)), (100 + xl, 350 + yl))
     pygame.draw.rect(screen, (123, 0, 123), (90 + xl, 340 + yl, 130, 30), 1)
 
+
 def Saves(save='r'):
     global K, Flag, dialog, menu
     saves = open("saves.txt", save)
@@ -78,8 +80,9 @@ def Saves(save='r'):
     if save == 'w':
         saves.write(str(K) + ' ' + str(int(Flag)) + ' ' + str(int(dialog)) + ' ' + str(int(menu)))
 
+
 clock = pygame.time.Clock()
-fps = 5
+fps = 60
 K = -1
 xl, yl = 0, 50
 save = False
@@ -96,7 +99,7 @@ walls = pygame.image.load('data/стены_1.png')
 future = False
 while gamerun:
     if dialog:
-        font = pygame.font.Font(None, 15)
+        font = pygame.font.Font(None, 20)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 gamerun = False
@@ -169,7 +172,7 @@ while gamerun:
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
-                if event.button == 1 and (400 < x < 530) and (400 < y < 430):
+                if event.button == 1 and (400 < x < 600) and (400 < y < 430):
                     future = False
                     menu = True
     pygame.display.update()
