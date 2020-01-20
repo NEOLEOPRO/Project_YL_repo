@@ -1,5 +1,4 @@
 import pygame
-import os
 
 LABELS = ['Название', 'Новая игра', 'Продолжить', 'Достижения', 'Настройки', 'Выход']
 Frases = ['Никто из нас уже не сможет сказать, как выглядят трава, деревья и реки.',
@@ -24,25 +23,17 @@ clock = pygame.time.Clock()
 pygame.display.set_caption('Super Game')
 
 
-def load_image(name, colorkey=None):
-    fullname = os.path.join('data', name)
-    image = pygame.image.load(fullname).convert()
-    if colorkey is not None:
-        if colorkey == -1:
-            colorkey = image.get_at((0, 0))
-        image.set_colorkey(colorkey)
-    else:
-        image = image.convert_alpha()
-    return image
+def load_image(name):
+    return pygame.image.load('data/' + name)
 
 
-def music(name):
-    fullname = os.path.join('data', name)
+def music(name, volume=1):
     if name[-3:] == 'mp3':
-        pygame.mixer.music.load(fullname)
+        pygame.mixer.music.load('data/' + name)
         pygame.mixer.music.play()
+        pygame.mixer.music.set_volume(volume)
     elif name[-3:] == 'ogg' or name[-3:] == 'wav':
-        return pygame.mixer.Sound(fullname)
+        return pygame.mixer.Sound('data/' + name)
     else:
         print('error sound')
 
@@ -94,8 +85,8 @@ lvl = False
 music('TownTheme.mp3')
 x_fon, y_fon = 23, 45
 x_walls, y_walls = 0, 0
-fon = pygame.image.load('data/фон_1.png')
-walls = pygame.image.load('data/стены_1.png')
+fon = load_image('фон_1.png')
+walls = load_image('стены_1.png')
 future = False
 while gamerun:
     if dialog:
