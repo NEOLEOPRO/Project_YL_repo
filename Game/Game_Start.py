@@ -32,7 +32,7 @@ def load_image(name):
 def music(name, volume=1):
     if name[-3:] == 'mp3':
         pygame.mixer.music.load('data/' + name)
-        # pygame.mixer.music.play()
+        pygame.mixer.music.play()
         pygame.mixer.music.set_volume(volume)
     elif name[-3:] == 'ogg' or name[-3:] == 'wav':
         return pygame.mixer.Sound('data/' + name)
@@ -488,7 +488,6 @@ while gamerun:
         # .blit(walls, (x_walls, y_walls))
         all_sprites.update(event)
         all_sprites.draw(screen)
-        draw_trap()
     elif future:
         screen.fill((0, 0, 0))
         font = pygame.font.Font(None, 25)
